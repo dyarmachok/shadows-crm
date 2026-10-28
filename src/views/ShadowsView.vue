@@ -2,13 +2,17 @@
 import { computed, onMounted, ref, watch } from 'vue'
 
 import type { Paginated } from '@/api/http'
-import { postsApi, type Category, type ShadowPost } from '@/api/posts'
+import { postsApi, type Category, type PostStatus, type ShadowPost } from '@/api/posts'
 import PostCard from '@/components/PostCard.vue'
-import { useListQuery } from '@/composables/useListQuery'
+import PostStatusChip from '@/components/PostStatusChip.vue'
+import { useListQuery, useQueryParam } from '@/composables/useListQuery'
+import { formatDateTime } from '@/utils/date'
+import { postStatusItems } from '@/utils/postStatus'
 
 const LIMIT = 20
 
 const { page, categoryId } = useListQuery()
+const status = useQueryParam('status')
 
 const categories = ref<Category[]>([])
 const data = ref<Paginated<ShadowPost> | null>(null)
@@ -25,6 +29,7 @@ async function loadPosts() {
       page: page.value,
       limit: LIMIT,
       categoryId: categoryId.value ?? undefined,
+      status: (status.value as PostStatus | null) ?? undefined,
     })
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Не вдалося завантажити пости'
@@ -41,7 +46,7 @@ onMounted(async () => {
   }
 })
 
-watch(() => [page.value, categoryId.value], loadPosts, { immediate: true })
+watch(() => [page.value, categoryId.value, status.value], loadPosts, { immediate: true })
 </script>
 
 <template>
@@ -54,6 +59,15 @@ watch(() => [page.value, categoryId.value], loadPosts, { immediate: true })
       hide-details
       density="comfortable"
       style="max-width: 360px"
+    />
+    <v-select
+      v-model="status"
+      :items="postStatusItems"
+      label="Статус"
+      clearable
+      hide-details
+      density="comfortable"
+      style="max-width: 240px"
     />
     <v-spacer />
     <span v-if="data" class="text-body-2 text-medium-emphasis">Всього: {{ data.total }}</span>
@@ -73,6 +87,16 @@ watch(() => [page.value, categoryId.value], loadPosts, { immediate: true })
         :image="post.image"
       >
         <template #actions>
+          <PostStatusChip :status="post.status" />
+          <span v-if="post.publishedAt" class="text-body-2 text-medium-emphasis">
+            {{ formatDateTime(post.publishedAt) }}
+          </span>
+          <span v-else-if="post.scheduledAt" class="text-body-2 text-medium-emphasis">
+            {{ formatDateTime(post.scheduledAt) }}
+          </span>
+          <span v-if="post.parts.length > 1" class="text-body-2 text-medium-emphasis">
+            {{ post.parts.length }} частин
+          </span>
           <v-spacer />
           <v-btn
             :to="{ name: 'shadow', params: { id: post.id } }"
@@ -89,7 +113,7 @@ watch(() => [page.value, categoryId.value], loadPosts, { immediate: true })
   <v-empty-state
     v-else-if="data && !loading"
     icon="mdi-text-box-remove-outline"
-    title="Готових постів ще немає"
+    title="Постів не знайдено"
     text="Перекладіть пости на сторінці Sources"
   >
     <template #actions>

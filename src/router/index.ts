@@ -35,6 +35,12 @@ const router = createRouter({
           props: true,
           meta: { title: 'Shadow' },
         },
+        {
+          path: 'schedule',
+          name: 'schedule',
+          component: () => import('../views/ScheduleView.vue'),
+          meta: { title: 'Розклад' },
+        },
       ],
     },
     {

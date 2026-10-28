@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PostImage } from '@/api/posts'
+import { formatDateTime } from '@/utils/date'
 
 defineProps<{
   label: string
@@ -7,9 +8,10 @@ defineProps<{
   note: string
   category?: string
   image?: PostImage | null
+  /** Якщо частин більше однієї, показуються вони замість note */
+  parts?: string[]
+  publishedParts?: number
 }>()
-
-const dateFormat = new Intl.DateTimeFormat('uk-UA', { dateStyle: 'medium', timeStyle: 'short' })
 </script>
 
 <template>
@@ -28,12 +30,27 @@ const dateFormat = new Intl.DateTimeFormat('uk-UA', { dateStyle: 'medium', timeS
       </template>
       <template #append>
         <span class="text-caption text-medium-emphasis">
-          {{ label }} · {{ dateFormat.format(new Date(date)) }}
+          {{ label }} · {{ formatDateTime(date) }}
         </span>
       </template>
     </v-card-item>
 
-    <v-card-text class="note flex-grow-1">{{ note }}</v-card-text>
+    <v-card-text v-if="parts && parts.length > 1" class="flex-grow-1">
+      <div v-for="(part, i) in parts" :key="i" class="part">
+        <div class="d-flex align-center ga-1 text-caption text-medium-emphasis mb-1">
+          Частина {{ i + 1 }}/{{ parts.length }}
+          <v-icon
+            v-if="publishedParts && i < publishedParts"
+            icon="mdi-check"
+            color="success"
+            size="small"
+            title="Опубліковано"
+          />
+        </div>
+        <div class="note">{{ part }}</div>
+      </div>
+    </v-card-text>
+    <v-card-text v-else class="note flex-grow-1">{{ note }}</v-card-text>
 
     <v-card-actions v-if="$slots.actions" class="flex-wrap ga-3 px-4">
       <slot name="actions" />
@@ -44,5 +61,11 @@ const dateFormat = new Intl.DateTimeFormat('uk-UA', { dateStyle: 'medium', timeS
 <style scoped>
 .note {
   white-space: pre-wrap;
+}
+
+.part + .part {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 </style>
