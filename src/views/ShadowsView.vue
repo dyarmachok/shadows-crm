@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import type { Paginated } from '@/api/http'
 import { postsApi, type Category, type PostStatus, type ShadowPost } from '@/api/posts'
 import PostCard from '@/components/PostCard.vue'
 import PostStatusChip from '@/components/PostStatusChip.vue'
+import ScheduleDialog from '@/components/ScheduleDialog.vue'
 import { useListQuery, useQueryParam } from '@/composables/useListQuery'
 import { formatDateTime } from '@/utils/date'
-import { postStatusItems } from '@/utils/postStatus'
+import { canSchedule, postStatusItems } from '@/utils/postStatus'
 
 const LIMIT = 20
 
@@ -18,6 +19,11 @@ const categories = ref<Category[]>([])
 const data = ref<Paginated<ShadowPost> | null>(null)
 const loading = ref(false)
 const error = ref('')
+
+const scheduleOpen = ref(false)
+const schedulePost = ref<ShadowPost | null>(null)
+const unscheduling = reactive(new Set<string>())
+const snackbar = reactive({ show: false, color: 'success', text: '' })
 
 const categoryItems = computed(() => categories.value.map((c) => ({ title: c.name, value: c.id })))
 
@@ -35,6 +41,43 @@ async function loadPosts() {
     error.value = e instanceof Error ? e.message : 'Не вдалося завантажити пости'
   } finally {
     loading.value = false
+  }
+}
+
+// оновлює пост у списку; якщо він більше не підходить під фільтр статусу — прибирає
+function replacePost(updated: ShadowPost) {
+  if (!data.value) return
+
+  if (status.value && updated.status !== status.value) {
+    data.value.items = data.value.items.filter((post) => post.id !== updated.id)
+    data.value.total--
+    if (!data.value.items.length) loadPosts()
+  } else {
+    data.value.items = data.value.items.map((post) => (post.id === updated.id ? updated : post))
+  }
+}
+
+function openSchedule(post: ShadowPost) {
+  schedulePost.value = post
+  scheduleOpen.value = true
+}
+
+function onScheduled(post: ShadowPost) {
+  replacePost(post)
+  const text = `Заплановано на ${formatDateTime(post.scheduledAt!)}`
+  Object.assign(snackbar, { show: true, color: 'success', text })
+}
+
+async function unschedule(post: ShadowPost) {
+  unscheduling.add(post.id)
+  try {
+    replacePost(await postsApi.unschedule(post.id))
+    Object.assign(snackbar, { show: true, color: 'success', text: 'Пост знято з черги' })
+  } catch (e) {
+    const text = e instanceof Error ? e.message : 'Не вдалося зняти пост з черги'
+    Object.assign(snackbar, { show: true, color: 'error', text })
+  } finally {
+    unscheduling.delete(post.id)
   }
 }
 
@@ -99,12 +142,31 @@ watch(() => [page.value, categoryId.value, status.value], loadPosts, { immediate
           </span>
           <v-spacer />
           <v-btn
-            :to="{ name: 'shadow', params: { id: post.id } }"
+            v-if="post.status === 'scheduled'"
+            icon="mdi-calendar-remove"
+            color="error"
             variant="text"
-            append-icon="mdi-arrow-right"
+            size="small"
+            title="Зняти з черги"
+            :loading="unscheduling.has(post.id)"
+            @click="unschedule(post)"
+          />
+          <v-btn
+            v-if="canSchedule(post.status)"
+            color="primary"
+            variant="tonal"
+            prepend-icon="mdi-calendar-plus"
+            @click="openSchedule(post)"
           >
-            Детальніше
+            {{ post.status === 'scheduled' ? 'Перенести' : 'Запланувати' }}
           </v-btn>
+          <v-btn
+            :to="{ name: 'shadow', params: { id: post.id } }"
+            icon="mdi-arrow-right"
+            variant="text"
+            size="small"
+            title="Детальніше"
+          />
         </template>
       </PostCard>
     </v-col>
@@ -129,4 +191,15 @@ watch(() => [page.value, categoryId.value, status.value], loadPosts, { immediate
     :disabled="loading"
     class="mt-4"
   />
+
+  <ScheduleDialog
+    v-if="schedulePost"
+    v-model="scheduleOpen"
+    :post="schedulePost"
+    @saved="onScheduled"
+  />
+
+  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="4000">
+    {{ snackbar.text }}
+  </v-snackbar>
 </template>

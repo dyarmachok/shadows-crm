@@ -12,3 +12,7 @@ export const postStatusItems = Object.entries(postStatusMeta).map(([value, meta]
   value,
   title: meta.title,
 }))
+
+/** Статуси, з яких пост можна поставити в слот або перенести */
+export const canSchedule = (status: PostStatus) =>
+  status === 'translated' || status === 'scheduled' || status === 'failed'
