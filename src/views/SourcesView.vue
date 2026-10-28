@@ -3,9 +3,9 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import type { Paginated } from '@/api/http'
 import type { ShadowPost } from '@/api/posts'
-import { sourcesApi, type SourceCategory, type SourcePost } from '@/api/sources'
+import { sourcesApi, type SourceCategory, type SourcePost, type SourcesSort } from '@/api/sources'
 import PostCard from '@/components/PostCard.vue'
-import { useListQuery } from '@/composables/useListQuery'
+import { useListQuery, useQueryParam } from '@/composables/useListQuery'
 
 const LIMIT = 20
 
@@ -20,6 +20,13 @@ const reactionEmoji: Record<string, string> = {
 }
 
 const { page, categoryId } = useListQuery()
+
+const sortParam = useQueryParam('sort')
+// newest — значення за замовчуванням, у URL його не пишемо
+const sort = computed({
+  get: (): SourcesSort => (sortParam.value === 'oldest' ? 'oldest' : 'newest'),
+  set: (value: SourcesSort) => (sortParam.value = value === 'oldest' ? value : null),
+})
 
 const categories = ref<SourceCategory[]>([])
 const data = ref<Paginated<SourcePost> | null>(null)
@@ -46,6 +53,7 @@ async function loadPosts() {
       page: page.value,
       limit: LIMIT,
       categoryId: categoryId.value ? Number(categoryId.value) : undefined,
+      sort: sort.value,
     })
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Не вдалося завантажити пости'
@@ -87,7 +95,7 @@ onMounted(async () => {
   }
 })
 
-watch(() => [page.value, categoryId.value], loadPosts, { immediate: true })
+watch(() => [page.value, categoryId.value, sort.value], loadPosts, { immediate: true })
 </script>
 
 <template>
@@ -101,6 +109,10 @@ watch(() => [page.value, categoryId.value], loadPosts, { immediate: true })
       density="comfortable"
       style="max-width: 360px"
     />
+    <v-btn-toggle v-model="sort" mandatory density="comfortable" variant="outlined" divided>
+      <v-btn value="newest" prepend-icon="mdi-sort-calendar-descending">Спочатку нові</v-btn>
+      <v-btn value="oldest" prepend-icon="mdi-sort-calendar-ascending">Спочатку старі</v-btn>
+    </v-btn-toggle>
     <v-spacer />
     <span v-if="data" class="text-body-2 text-medium-emphasis">
       Неперекладених: {{ data.total }}

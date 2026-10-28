@@ -22,10 +22,14 @@ export interface SourcePost {
   postId: string | null
 }
 
+/** За датою публікації: newest — від нових, oldest — від старих */
+export type SourcesSort = 'newest' | 'oldest'
+
 export interface SourcesQuery {
   page?: number
   limit?: number
   categoryId?: number
+  sort?: SourcesSort
 }
 
 export const sourcesApi = {
