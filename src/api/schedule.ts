@@ -26,8 +26,8 @@ export interface ScheduleDay {
 export const scheduleApi = {
   /** date — локальна дата YYYY-MM-DD */
   day: (date: string, timeZone: string) =>
-    request<ScheduleDay>(`/schedule/day?${toQueryString({ date, timeZone })}`),
+    request<ScheduleDay>(`/api/schedule/day?${toQueryString({ date, timeZone })}`),
   /** Пости зі слотами в проміжку [from, to) */
   range: (from: string, to: string) =>
-    request<ShadowPost[]>(`/schedule?${toQueryString({ from, to })}`),
+    request<ShadowPost[]>(`/api/schedule?${toQueryString({ from, to })}`),
 }

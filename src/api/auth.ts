@@ -18,6 +18,6 @@ export interface LoginResponse {
 
 export const authApi = {
   login: (payload: LoginPayload) =>
-    request<LoginResponse>('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
-  me: () => request<User>('/auth/me'),
+    request<LoginResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+  me: () => request<User>('/api/auth/me'),
 }

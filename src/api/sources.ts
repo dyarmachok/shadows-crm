@@ -30,8 +30,9 @@ export interface SourcesQuery {
 
 export const sourcesApi = {
   list: (query: SourcesQuery = {}) =>
-    request<Paginated<SourcePost>>(`/sources?${toQueryString(query)}`),
-  categories: () => request<SourceCategory[]>('/sources/categories'),
-  get: (id: number) => request<SourcePost>(`/sources/${id}`),
-  translate: (id: number) => request<ShadowPost>(`/sources/${id}/translate`, { method: 'POST' }),
+    request<Paginated<SourcePost>>(`/api/sources?${toQueryString(query)}`),
+  categories: () => request<SourceCategory[]>('/api/sources/categories'),
+  get: (id: number) => request<SourcePost>(`/api/sources/${id}`),
+  translate: (id: number) =>
+    request<ShadowPost>(`/api/sources/${id}/translate`, { method: 'POST' }),
 }

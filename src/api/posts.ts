@@ -48,14 +48,15 @@ export interface PostsQuery {
 
 export const postsApi = {
   list: (query: PostsQuery = {}) =>
-    request<Paginated<ShadowPost>>(`/posts?${toQueryString(query)}`),
-  get: (id: string) => request<ShadowPost>(`/posts/${id}`),
-  categories: () => request<Category[]>('/categories'),
+    request<Paginated<ShadowPost>>(`/api/posts?${toQueryString(query)}`),
+  get: (id: string) => request<ShadowPost>(`/api/posts/${id}`),
+  categories: () => request<Category[]>('/api/categories'),
   /** scheduledAt — початок години в майбутньому, ISO 8601 з часовим поясом */
   schedule: (id: string, scheduledAt: string) =>
-    request<ShadowPost>(`/posts/${id}/schedule`, {
+    request<ShadowPost>(`/api/posts/${id}/schedule`, {
       method: 'PUT',
       body: JSON.stringify({ scheduledAt }),
     }),
-  unschedule: (id: string) => request<ShadowPost>(`/posts/${id}/schedule`, { method: 'DELETE' }),
+  unschedule: (id: string) =>
+    request<ShadowPost>(`/api/posts/${id}/schedule`, { method: 'DELETE' }),
 }
