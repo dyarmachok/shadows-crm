@@ -35,6 +35,12 @@ const router = createRouter({
           props: (route) => ({ id: Number(route.params.id) }),
           meta: { title: 'SpillTea' },
         },
+        {
+          path: 'categories',
+          name: 'categories',
+          component: () => import('../views/CategoriesView.vue'),
+          meta: { title: 'Категорії' },
+        },
       ],
     },
     {

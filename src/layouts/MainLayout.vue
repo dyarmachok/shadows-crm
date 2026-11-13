@@ -19,6 +19,7 @@ const menu = [
   },
   { title: 'Sources', icon: 'mdi-database-outline', to: { name: 'sources' } },
   { title: 'SpillTea', icon: 'mdi-tea-outline', to: { name: 'spilltea' } },
+  { title: 'Категорії', icon: 'mdi-shape-outline', to: { name: 'categories' } },
 ]
 
 function logout() {
