@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import type { Paginated } from '@/api/http'
-import { spillteaApi, type SpillTeaCategory, type SpillTeaPost } from '@/api/spilltea'
+import { spillteaApi, type Language, type SpillTeaCategory, type SpillTeaPost } from '@/api/spilltea'
 import PostCard from '@/components/PostCard.vue'
 import { useListQuery, useQueryParam } from '@/composables/useListQuery'
 import { formatDateTime } from '@/utils/date'
-import { categoryName, languageOrder, translationFor } from '@/utils/languages'
+import {
+  categoryName,
+  CRM_LANGUAGE,
+  languageLabels,
+  languageOrder,
+  translationFor,
+} from '@/utils/languages'
 
 const LIMIT = 20
 
@@ -31,6 +37,10 @@ const siteItems = [
 
 const languagesOf = (post: SpillTeaPost) =>
   languageOrder.filter((lang) => post.translations.some((t) => t.lang === lang))
+
+/** Обрана мова для кожного поста; за замовчуванням — мова CRM */
+const selectedLang = reactive(new Map<number, Language>())
+const langOf = (post: SpillTeaPost) => selectedLang.get(post.id) ?? CRM_LANGUAGE
 
 async function loadPosts() {
   loading.value = true
@@ -93,7 +103,7 @@ watch(() => [page.value, categoryId.value, onSiteParam.value], loadPosts, { imme
       <PostCard
         :label="post.sourceId ? `з #${post.sourceId}` : `#${post.id}`"
         :date="post.createdAt"
-        :note="translationFor(post)?.body ?? ''"
+        :note="translationFor(post, langOf(post))?.body ?? ''"
         :category="categoryName(post.category)"
         :image="post.image"
       >
@@ -102,8 +112,11 @@ watch(() => [page.value, categoryId.value, onSiteParam.value], loadPosts, { imme
             v-for="lang in languagesOf(post)"
             :key="lang"
             size="small"
-            variant="outlined"
+            :variant="translationFor(post, langOf(post))?.lang === lang ? 'flat' : 'outlined'"
+            :color="translationFor(post, langOf(post))?.lang === lang ? 'primary' : undefined"
+            :title="languageLabels[lang]"
             class="text-uppercase"
+            @click="selectedLang.set(post.id, lang)"
           >
             {{ lang }}
           </v-chip>
