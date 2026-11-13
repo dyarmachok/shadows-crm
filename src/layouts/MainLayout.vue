@@ -18,8 +18,7 @@ const menu = [
     exact: true,
   },
   { title: 'Sources', icon: 'mdi-database-outline', to: { name: 'sources' } },
-  { title: 'Shadows', icon: 'mdi-text-box-check-outline', to: { name: 'shadows' } },
-  { title: 'Розклад', icon: 'mdi-calendar-clock', to: { name: 'schedule' } },
+  { title: 'SpillTea', icon: 'mdi-tea-outline', to: { name: 'spilltea' } },
 ]
 
 function logout() {

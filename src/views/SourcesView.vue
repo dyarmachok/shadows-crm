@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import type { Paginated } from '@/api/http'
-import type { ShadowPost } from '@/api/posts'
+import type { SpillTeaPost } from '@/api/spilltea'
 import { sourcesApi, type SourceCategory, type SourcePost, type SourcesSort } from '@/api/sources'
 import PostCard from '@/components/PostCard.vue'
 import { useListQuery, useQueryParam } from '@/composables/useListQuery'
@@ -38,7 +38,7 @@ const snackbar = reactive({
   show: false,
   color: 'success',
   text: '',
-  post: null as ShadowPost | null,
+  post: null as SpillTeaPost | null,
 })
 
 const categoryItems = computed(() =>
@@ -69,7 +69,7 @@ async function translate(source: SourcePost) {
     Object.assign(snackbar, {
       show: true,
       color: 'success',
-      text: `Пост #${source.id} перекладено`,
+      text: `Пост #${source.id} перекладено (${post.translations.length} мов)`,
       post,
     })
 
@@ -150,7 +150,7 @@ watch(() => [page.value, categoryId.value, sort.value], loadPosts, { immediate: 
           <v-spacer />
           <v-btn
             v-if="post.postId"
-            :to="{ name: 'shadow', params: { id: post.postId } }"
+            :to="{ name: 'spilltea-post', params: { id: post.postId } }"
             variant="text"
             prepend-icon="mdi-open-in-new"
           >
@@ -189,7 +189,7 @@ watch(() => [page.value, categoryId.value, sort.value], loadPosts, { immediate: 
   <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="5000">
     {{ snackbar.text }}
     <template v-if="snackbar.post" #actions>
-      <v-btn variant="text" :to="{ name: 'shadow', params: { id: snackbar.post.id } }">
+      <v-btn variant="text" :to="{ name: 'spilltea-post', params: { id: snackbar.post.id } }">
         Відкрити
       </v-btn>
     </template>
