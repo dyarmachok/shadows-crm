@@ -6,13 +6,14 @@ export const CRM_LANGUAGE: Language = 'uk'
 export const languageLabels: Record<Language, string> = {
   uk: 'Українська',
   en: 'English',
-  es: 'Español',
-  pt: 'Português',
-  de: 'Deutsch',
 }
 
 /** Порядок вкладок у CRM: спершу українська */
-export const languageOrder: Language[] = ['uk', 'en', 'es', 'pt', 'de']
+export const languageOrder: Language[] = ['uk', 'en']
+
+/** Мови, якими контент публікується на сайті; slug потрібен лише для них */
+export const SITE_LANGUAGES: Language[] = ['en']
+export const isSiteLanguage = (lang: Language) => SITE_LANGUAGES.includes(lang)
 
 export const categoryName = (category: SpillTeaCategory | null) =>
   category ? (category.names[CRM_LANGUAGE] ?? category.name) : undefined

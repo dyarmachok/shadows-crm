@@ -5,7 +5,13 @@ import { sourcesApi, type SourcePost } from '@/api/sources'
 import { spillteaApi, type Language, type SpillTeaPost } from '@/api/spilltea'
 import PostCard from '@/components/PostCard.vue'
 import { formatDateTime } from '@/utils/date'
-import { categoryName, CRM_LANGUAGE, languageLabels, languageOrder } from '@/utils/languages'
+import {
+  categoryName,
+  CRM_LANGUAGE,
+  isSiteLanguage,
+  languageLabels,
+  languageOrder,
+} from '@/utils/languages'
 
 const props = defineProps<{ id: number }>()
 
@@ -87,7 +93,7 @@ watch(() => props.id, load, { immediate: true })
           <v-tabs-window-item v-for="t in translations" :key="t.lang" :value="t.lang">
             <v-card-text class="note">{{ t.body }}</v-card-text>
             <v-card-text class="pt-0 d-flex flex-wrap ga-4 text-body-2 text-medium-emphasis">
-              <span title="Slug для адреси на сайті">
+              <span v-if="isSiteLanguage(t.lang)" title="Slug для адреси на сайті">
                 <v-icon icon="mdi-link-variant" size="small" /> {{ t.slug }}
               </span>
               <span title="Лайки з ideer на момент імпорту">

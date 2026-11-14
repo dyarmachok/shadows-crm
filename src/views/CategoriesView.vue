@@ -121,9 +121,7 @@ onMounted(load)
     >
       <template #[`item.uk`]="{ item }">
         <span class="font-weight-medium">{{ item.uk }}</span>
-        <div class="text-caption text-medium-emphasis">
-          {{ item.translations[CRM_LANGUAGE]?.slug }}
-        </div>
+        <div class="text-caption text-medium-emphasis">/{{ item.translations.en?.slug }}</div>
       </template>
       <template #[`item.reviewedAt`]="{ item }">
         <v-chip

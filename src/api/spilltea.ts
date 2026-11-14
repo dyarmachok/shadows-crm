@@ -2,7 +2,8 @@ import { request, toQueryString, type Paginated } from './http'
 import type { PostImage } from './sources'
 
 /** Мови додатка; en — основна */
-export type Language = 'en' | 'uk' | 'es' | 'pt' | 'de'
+/** en — мова сайту, uk — лише для CRM */
+export type Language = 'en' | 'uk'
 
 export interface SpillTeaCategory {
   id: number

@@ -8,7 +8,7 @@ import {
   type LocalizedName,
 } from '@/api/categories'
 import type { Language } from '@/api/spilltea'
-import { languageLabels, languageOrder } from '@/utils/languages'
+import { isSiteLanguage, languageLabels, languageOrder } from '@/utils/languages'
 
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/
 
@@ -52,7 +52,7 @@ const changes = computed(() => {
     const slug = form[lang].slug.trim()
     const diff: Partial<LocalizedName> = {}
     if (name !== (before?.name ?? '')) diff.name = name
-    if (slug !== (before?.slug ?? '')) diff.slug = slug
+    if (isSiteLanguage(lang) && slug !== (before?.slug ?? '')) diff.slug = slug
     if (Object.keys(diff).length) translations[lang] = diff
   }
   return translations
@@ -62,7 +62,9 @@ const reviewedChanged = computed(() => reviewed.value !== !!props.category.revie
 const dirty = computed(() => Object.keys(changes.value).length > 0 || reviewedChanged.value)
 const valid = computed(() =>
   languageOrder.every(
-    (l) => rules.name(form[l].name) === true && rules.slug(form[l].slug) === true,
+    (l) =>
+      rules.name(form[l].name) === true &&
+      (!isSiteLanguage(l) || rules.slug(form[l].slug) === true),
   ),
 )
 
@@ -107,13 +109,15 @@ async function saveAsReviewed() {
         {{ form.uk.name || category.translations.en?.name }}
         <span class="text-caption text-medium-emphasis">#{{ category.id }}</span>
       </v-card-title>
-      <v-card-subtitle> Зміна slug змінює адресу сторінки категорії на сайті </v-card-subtitle>
+      <v-card-subtitle>
+        На сайті лише англійська; зміна slug змінює адресу сторінки категорії
+      </v-card-subtitle>
 
       <v-card-text>
         <v-alert v-if="error" type="error" variant="tonal" class="mb-4" :text="error" />
 
         <v-row v-for="lang in languageOrder" :key="lang" dense>
-          <v-col cols="12" sm="5">
+          <v-col cols="12" :sm="isSiteLanguage(lang) ? 5 : 12">
             <v-text-field
               v-model="form[lang].name"
               :label="languageLabels[lang]"
@@ -121,7 +125,7 @@ async function saveAsReviewed() {
               density="comfortable"
             />
           </v-col>
-          <v-col cols="12" sm="7">
+          <v-col v-if="isSiteLanguage(lang)" cols="12" sm="7">
             <v-text-field
               v-model="form[lang].slug"
               label="Slug"
@@ -143,11 +147,7 @@ async function saveAsReviewed() {
           </v-col>
         </v-row>
 
-        <v-checkbox
-          v-model="reviewed"
-          label="Перевірено: назви й slug-и всіма мовами коректні"
-          hide-details
-        />
+        <v-checkbox v-model="reviewed" label="Перевірено: назви й slug коректні" hide-details />
       </v-card-text>
 
       <v-card-actions>
