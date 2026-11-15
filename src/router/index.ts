@@ -36,6 +36,12 @@ const router = createRouter({
           meta: { title: 'SpillTea' },
         },
         {
+          path: 'queue',
+          name: 'queue',
+          component: () => import('../views/QueueView.vue'),
+          meta: { title: 'Черга публікацій' },
+        },
+        {
           path: 'categories',
           name: 'categories',
           component: () => import('../views/CategoriesView.vue'),

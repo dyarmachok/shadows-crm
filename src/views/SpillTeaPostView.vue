@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import { sourcesApi, type SourcePost } from '@/api/sources'
 import { spillteaApi, type Language, type SpillTeaPost } from '@/api/spilltea'
 import PostCard from '@/components/PostCard.vue'
+import PostPublications from '@/components/publications/PostPublications.vue'
 import { formatDateTime } from '@/utils/date'
 import {
   categoryName,
@@ -45,6 +46,15 @@ async function load() {
 }
 
 watch(() => props.id, load, { immediate: true })
+
+/** Оновити пост після змін публікацій, без повторного завантаження оригіналу */
+async function reload() {
+  try {
+    post.value = await spillteaApi.get(props.id)
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'Не вдалося оновити пост'
+  }
+}
 </script>
 
 <template>
@@ -109,17 +119,7 @@ watch(() => props.id, load, { immediate: true })
     </v-col>
 
     <v-col cols="12" lg="5">
-      <v-card border flat class="mb-4">
-        <v-card-title class="text-subtitle-1">Публікація</v-card-title>
-        <v-list density="compact">
-          <v-list-item
-            prepend-icon="mdi-web"
-            title="Сайт"
-            :subtitle="post.publishedAt ? formatDateTime(post.publishedAt) : 'Не опубліковано'"
-          />
-          <v-list-item prepend-icon="mdi-at" title="Threads" subtitle="Скоро" />
-        </v-list>
-      </v-card>
+      <PostPublications :post="post" class="mb-4" @changed="reload" />
 
       <template v-if="post.sourceId">
         <div class="text-overline mb-2">Оригінал #{{ post.sourceId }}</div>

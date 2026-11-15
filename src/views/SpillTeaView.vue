@@ -2,10 +2,16 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import type { Paginated } from '@/api/http'
-import { spillteaApi, type Language, type SpillTeaCategory, type SpillTeaPost } from '@/api/spilltea'
+import {
+  spillteaApi,
+  type Language,
+  type SpillTeaCategory,
+  type SpillTeaPost,
+} from '@/api/spilltea'
 import PostCard from '@/components/PostCard.vue'
+import PublicationChips from '@/components/publications/PublicationChips.vue'
+import PublishDialog from '@/components/publications/PublishDialog.vue'
 import { useListQuery, useQueryParam } from '@/composables/useListQuery'
-import { formatDateTime } from '@/utils/date'
 import {
   categoryName,
   CRM_LANGUAGE,
@@ -37,6 +43,14 @@ const siteItems = [
 
 const languagesOf = (post: SpillTeaPost) =>
   languageOrder.filter((lang) => post.translations.some((t) => t.lang === lang))
+
+/** Пост, для якого відкрито діалог публікації */
+const publishing = ref<SpillTeaPost | null>(null)
+const publishOpen = ref(false)
+function openPublish(post: SpillTeaPost) {
+  publishing.value = post
+  publishOpen.value = true
+}
 
 /** Обрана мова для кожного поста; за замовчуванням — мова CRM */
 const selectedLang = reactive(new Map<number, Language>())
@@ -120,17 +134,17 @@ watch(() => [page.value, categoryId.value, onSiteParam.value], loadPosts, { imme
           >
             {{ lang }}
           </v-chip>
-          <v-chip
-            v-if="post.publishedAt"
-            size="small"
-            color="success"
-            variant="tonal"
-            prepend-icon="mdi-web-check"
-            :title="formatDateTime(post.publishedAt)"
-          >
-            На сайті
-          </v-chip>
+          <PublicationChips :publications="post.publications" />
           <v-spacer />
+          <v-btn
+            v-if="post.publications.length < 2"
+            variant="text"
+            color="primary"
+            prepend-icon="mdi-send-clock-outline"
+            @click="openPublish(post)"
+          >
+            Опублікувати
+          </v-btn>
           <v-btn
             :to="{ name: 'spilltea-post', params: { id: post.id } }"
             variant="text"
@@ -149,6 +163,8 @@ watch(() => [page.value, categoryId.value, onSiteParam.value], loadPosts, { imme
     title="Постів поки немає"
     text="Перекладіть пост у Sources — він з'явиться тут усіма мовами"
   />
+
+  <PublishDialog v-if="publishing" v-model="publishOpen" :post="publishing" @done="loadPosts" />
 
   <v-pagination
     v-if="data && data.totalPages > 1"

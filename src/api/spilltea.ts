@@ -1,7 +1,7 @@
 import { request, toQueryString, type Paginated } from './http'
+import type { Publication } from './publications'
 import type { PostImage } from './sources'
 
-/** Мови додатка; en — основна */
 /** en — мова сайту, uk — лише для CRM */
 export type Language = 'en' | 'uk'
 
@@ -27,7 +27,7 @@ export interface SpillTeaTranslation {
   commentsCount: number
 }
 
-/** Пост, перекладений з ideer усіма мовами; куди публікувати — вирішується в CRM */
+/** Пост, перекладений з ideer (en + uk); куди публікувати — вирішується в CRM */
 export interface SpillTeaPost {
   id: number
   /** id вихідного поста в ideer */
@@ -39,6 +39,8 @@ export interface SpillTeaPost {
   createdAt: string
   updatedAt: string
   translations: SpillTeaTranslation[]
+  /** Публікації на сайт / в Threads */
+  publications: Publication[]
 }
 
 export interface SpillTeaQuery {
