@@ -31,7 +31,7 @@ function logout() {
 
 <template>
   <v-navigation-drawer v-model="drawer">
-    <v-list-item title="Shadows CRM" class="py-4" />
+    <v-list-item title="Spilltea CRM" class="py-4" />
     <v-divider />
     <v-list nav>
       <v-list-item

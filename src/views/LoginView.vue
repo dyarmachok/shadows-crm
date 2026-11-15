@@ -40,7 +40,7 @@ async function onSubmit(event: Promise<{ valid: boolean }>) {
       <v-row justify="center">
         <v-col cols="12" sm="8" md="5" lg="4">
           <v-card class="pa-4" elevation="4">
-            <v-card-title class="text-h5 text-center">Shadows CRM</v-card-title>
+            <v-card-title class="text-h5 text-center">Spilltea CRM</v-card-title>
             <v-card-subtitle class="text-center">Вхід до системи</v-card-subtitle>
 
             <v-card-text>
