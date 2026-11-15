@@ -34,6 +34,15 @@ function remove() {
 /** Повторити після помилки: у той самий час або одразу, якщо він минув */
 const retry = () => run(() => publicationsApi.update(props.publication.id, {}))
 
+/** Опублікувати одразу, не чекаючи запланованого часу */
+function publishNow() {
+  const p = props.publication
+  const where = p.channel === 'threads' ? 'у Threads' : 'на сайті'
+  if (confirm(`Опублікувати ${where} зараз?`)) {
+    run(() => publicationsApi.update(p.id, { at: 'now' }))
+  }
+}
+
 const canEdit = () => ['scheduled', 'failed'].includes(props.publication.status)
 const canRemove = () =>
   canEdit()
@@ -60,6 +69,16 @@ const canRemove = () =>
       title="Повторити"
       :loading="busy"
       @click="retry"
+    />
+    <v-btn
+      v-if="canEdit()"
+      icon="mdi-send"
+      size="small"
+      variant="text"
+      color="primary"
+      title="Опублікувати зараз"
+      :loading="busy"
+      @click="publishNow"
     />
     <v-btn
       v-if="canEdit()"

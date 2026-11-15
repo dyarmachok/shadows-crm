@@ -44,11 +44,11 @@ watch(
   { immediate: true },
 )
 
-async function submit() {
+async function submit(when: PublishAt = at.value) {
   saving.value = true
   error.value = ''
   try {
-    await publicationsApi.publish(props.post.id, channels.value, at.value)
+    await publicationsApi.publish(props.post.id, channels.value, when)
     emit('done')
     open.value = false
   } catch (e) {
@@ -113,11 +113,22 @@ async function submit() {
         <v-spacer />
         <v-btn variant="text" @click="open = false">Скасувати</v-btn>
         <v-btn
+          v-if="at !== 'now'"
+          color="primary"
+          variant="tonal"
+          prepend-icon="mdi-send"
+          :loading="saving"
+          :disabled="!channels.length || !hasEnglish"
+          @click="submit('now')"
+        >
+          Опублікувати зараз
+        </v-btn>
+        <v-btn
           color="primary"
           variant="flat"
           :loading="saving"
           :disabled="!channels.length || !hasEnglish || !picker?.valid"
-          @click="submit"
+          @click="submit()"
         >
           {{ at === 'now' ? 'Опублікувати' : 'Запланувати' }}
         </v-btn>
