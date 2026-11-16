@@ -47,6 +47,12 @@ const router = createRouter({
           component: () => import('../views/CategoriesView.vue'),
           meta: { title: 'Категорії' },
         },
+        {
+          path: 'users',
+          name: 'users',
+          component: () => import('../views/UsersView.vue'),
+          meta: { title: 'Користувачі' },
+        },
       ],
     },
     {

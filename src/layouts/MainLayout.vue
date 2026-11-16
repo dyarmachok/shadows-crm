@@ -21,6 +21,7 @@ const menu = [
   { title: 'SpillTea', icon: 'mdi-tea-outline', to: { name: 'spilltea' } },
   { title: 'Черга', icon: 'mdi-calendar-clock-outline', to: { name: 'queue' } },
   { title: 'Категорії', icon: 'mdi-shape-outline', to: { name: 'categories' } },
+  { title: 'Користувачі', icon: 'mdi-account-multiple-outline', to: { name: 'users' } },
 ]
 
 function logout() {
